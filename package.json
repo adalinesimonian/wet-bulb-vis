@@ -1,0 +1,28 @@
+{
+  "name": "wet-bulb-vis",
+  "packageManager": "yarn@4.9.2",
+  "type": "module",
+  "source": "index.html",
+  "scripts": {
+    "dev": "parcel",
+    "build": "parcel build",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@parcel/core": "^2.15.4",
+    "parcel": "^2.15.4",
+    "prettier": "^3.5.3",
+    "terser": "^5.43.0",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.0",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "chartjs-plugin-annotation": "^3.1.0",
+    "chartjs-plugin-zoom": "^2.2.0",
+    "date-fns": "^4.1.0"
+  },
+  "volta": {
+    "node": "24.2.0"
+  }
+}

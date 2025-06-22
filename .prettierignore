@@ -1,0 +1,6 @@
+.vscode
+.parcel-cache
+dist
+.yarn
+.pnp.cjs
+.pnp.loader.mjs

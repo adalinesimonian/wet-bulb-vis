@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Interactive wet bulb temperature visualization tool for understanding climate impacts on human health"
+    />
+    <title>Wet Bulb Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header" role="banner">
+        <div class="container">
+          <h1 class="app-title">Wet Bulb Visualizer</h1>
+          <p class="app-subtitle">
+            An interactive tool to help you understand the risks of wet bulb
+            temperature and its impact on human health.
+          </p>
+        </div>
+      </header>
+
+      <main class="main-content" role="main">
+        <div class="container">
+          <!-- Interactive Controls -->
+          <section
+            class="interactive-section"
+            aria-labelledby="interactive-heading"
+          >
+            <div class="interactive-container">
+              <!-- Left Panel: Controls -->
+              <div class="controls-panel">
+                <!-- Mode Selection -->
+                <div
+                  class="mode-selector"
+                  role="radiogroup"
+                  aria-labelledby="mode-label"
+                >
+                  <label id="mode-label" class="sr-only"
+                    >Calculation Mode</label
+                  >
+                  <button
+                    type="button"
+                    class="mode-button active"
+                    data-mode="wetbulb-input"
+                    role="radio"
+                    aria-checked="true"
+                    aria-describedby="wetbulb-input-desc"
+                  >
+                    <span class="mode-icon">📊</span>
+                    <span class="mode-text">Input Wet Bulb</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="mode-button"
+                    data-mode="temp-humidity-input"
+                    role="radio"
+                    aria-checked="false"
+                    aria-describedby="temp-humidity-desc"
+                  >
+                    <span class="mode-icon">🌡️</span>
+                    <span class="mode-text">Input Temp & Humidity</span>
+                  </button>
+                </div>
+                <span id="wetbulb-input-desc" class="sr-only"
+                  >Calculate temperature and humidity from wet bulb
+                  temperature</span
+                >
+                <span id="temp-humidity-desc" class="sr-only"
+                  >Calculate wet bulb temperature from temperature and
+                  humidity</span
+                >
+
+                <!-- Input Controls -->
+                <div class="input-controls">
+                  <!-- Wet Bulb Input Mode -->
+                  <div id="wetbulb-input-panel" class="input-group">
+                    <label for="wetbulb-input" class="input-label">
+                      Wet Bulb Temperature
+                      <span
+                        class="input-help"
+                        role="img"
+                        aria-label="Help"
+                        title="Enter a wet bulb temperature to see corresponding conditions"
+                        >?</span
+                      >
+                    </label>
+                    <div class="input-wrapper">
+                      <input
+                        type="range"
+                        id="wetbulb-slider"
+                        min="0"
+                        max="40"
+                        step="0.5"
+                        value="20"
+                        aria-label="Wet bulb temperature slider"
+                        aria-valuemin="0"
+                        aria-valuemax="40"
+                        aria-valuenow="20"
+                      />
+                      <div class="input-with-unit">
+                        <input
+                          type="number"
+                          id="wetbulb-input"
+                          min="0"
+                          max="40"
+                          step="0.1"
+                          value="20"
+                          aria-label="Wet bulb temperature value"
+                        />
+                        <span class="unit">°C</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Temperature & Humidity Input Mode -->
+                  <div
+                    id="temp-humidity-input-panel"
+                    class="input-group"
+                    style="display: none"
+                  >
+                    <div class="dual-inputs">
+                      <div class="input-item">
+                        <label for="temp-input" class="input-label">
+                          Air Temperature
+                          <span
+                            class="input-help"
+                            role="img"
+                            aria-label="Help"
+                            title="Ambient air temperature"
+                            >?</span
+                          >
+                        </label>
+                        <div class="input-wrapper compact">
+                          <input
+                            type="range"
+                            id="temp-slider"
+                            min="0"
+                            max="50"
+                            step="0.5"
+                            value="30"
+                            aria-label="Temperature slider"
+                          />
+                          <div class="input-with-unit">
+                            <input
+                              type="number"
+                              id="temp-input"
+                              min="0"
+                              max="50"
+                              step="0.1"
+                              value="30"
+                              aria-label="Temperature value"
+                            />
+                            <span class="unit">°C</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="input-item">
+                        <label for="humidity-input" class="input-label">
+                          Relative Humidity
+                          <span
+                            class="input-help"
+                            role="img"
+                            aria-label="Help"
+                            title="Percentage of moisture in the air"
+                            >?</span
+                          >
+                        </label>
+                        <div class="input-wrapper compact">
+                          <input
+                            type="range"
+                            id="humidity-slider"
+                            min="5"
+                            max="100"
+                            step="1"
+                            value="50"
+                            aria-label="Humidity slider"
+                          />
+                          <div class="input-with-unit">
+                            <input
+                              type="number"
+                              id="humidity-input"
+                              min="0"
+                              max="100"
+                              step="1"
+                              value="50"
+                              aria-label="Humidity value"
+                            />
+                            <span class="unit">%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Result Display -->
+                    <div class="result-display" id="calculated-wetbulb">
+                      <div class="result-label">Wet Bulb Temperature</div>
+                      <div class="result-value">
+                        <span id="calculated-value">--</span>°C
+                      </div>
+                    </div>
+                  </div>
+                  <div class="danger-scale" aria-label="Danger level indicator">
+                    <div class="danger-bar">
+                      <div class="danger-fill" id="calculated-danger"></div>
+                    </div>
+                    <div class="danger-labels">
+                      <span>Safe</span>
+                      <span>Caution</span>
+                      <span>Extreme</span>
+                      <span>Danger</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Warning Messages -->
+                <div
+                  id="warning-message"
+                  class="warning-message compact"
+                  role="alert"
+                  aria-live="polite"
+                  style="display: none"
+                >
+                  <span class="warning-icon">⚠️</span>
+                  <div class="warning-content">
+                    <strong class="warning-title"></strong>
+                    <p class="warning-text"></p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Panel: Chart -->
+              <div class="chart-panel">
+                <div class="chart-header">
+                  <h3 class="chart-title">
+                    Temperature & Humidity Relationships
+                  </h3>
+                  <div class="chart-controls">
+                    <button
+                      type="button"
+                      class="chart-button compact"
+                      id="reset-zoom"
+                      aria-label="Reset chart zoom"
+                    >
+                      Reset Zoom
+                    </button>
+                    <button
+                      type="button"
+                      class="chart-button compact"
+                      id="toggle-grid"
+                      aria-label="Toggle grid lines"
+                    >
+                      Toggle Grid
+                    </button>
+                    <button
+                      type="button"
+                      class="chart-button compact"
+                      id="toggle-labels"
+                      aria-label="Toggle threshold labels"
+                    >
+                      Toggle Labels
+                    </button>
+                  </div>
+                </div>
+                <div class="chart-container">
+                  <canvas
+                    id="wetbulb-chart"
+                    role="img"
+                    aria-label="Interactive chart showing wet bulb temperature relationships"
+                  ></canvas>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Educational Information -->
+          <section
+            class="education-section"
+            aria-labelledby="education-heading"
+          >
+            <h2 id="education-heading" class="section-title">
+              Understanding the Risks
+            </h2>
+            <div class="risk-grid">
+              <div class="risk-card safe" role="article">
+                <h3>Safe Zone (&lt; 19°C WBT)</h3>
+                <p>
+                  Normal conditions where the human body can effectively
+                  regulate temperature through sweating. Most outdoor activities
+                  are safe.
+                </p>
+              </div>
+              <div class="risk-card caution" role="article">
+                <h3>Caution (19-25°C WBT)</h3>
+                <p>
+                  Increased heat stress. Older adults and those with health
+                  conditions may struggle. Limit strenuous activity.
+                </p>
+              </div>
+              <div class="risk-card extreme" role="article">
+                <h3>Extreme (25-31°C WBT)</h3>
+                <p>
+                  Dangerous for vulnerable populations. Young healthy adults
+                  approach their compensability limit. Air conditioning becomes
+                  essential.
+                </p>
+              </div>
+              <div class="risk-card danger" role="article">
+                <h3>Unsurvivable (&gt; 31°C WBT)</h3>
+                <p>
+                  Beyond human adaptability. Even young, healthy individuals
+                  cannot cool themselves. Fatal without environmental cooling.
+                </p>
+              </div>
+            </div>
+            <div class="info-card">
+              <h2 id="intro-heading" class="section-title">
+                What is wet bulb temperature?
+              </h2>
+              <p>
+                Wet bulb temperature is a critical measure that combines air
+                temperature and humidity. It represents the lowest temperature
+                that can be reached through evaporative cooling - essentially,
+                how well our bodies can cool themselves through sweating.
+              </p>
+              <div class="key-points">
+                <div class="key-point" role="article">
+                  <span class="icon" aria-hidden="true">🌡️</span>
+                  <div>
+                    <h3>Why It Matters</h3>
+                    <p>
+                      Recent research shows the human body cannot cool itself
+                      when wet bulb temperatures exceed 31°C (87°F at 100%
+                      humidity) - lower than the previously thought 35°C limit.
+                    </p>
+                  </div>
+                </div>
+                <div class="key-point" role="article">
+                  <span class="icon" aria-hidden="true">⚠️</span>
+                  <div>
+                    <h3>Climate Change</h3>
+                    <p>
+                      At 2°C of global warming, 35% of Earth's land area and
+                      billions of people will experience these dangerous
+                      conditions regularly.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="research-note">
+                <p>
+                  <strong>Based on latest research:</strong>
+                  <a
+                    href="https://www.psu.edu/news/research/story/humans-cant-endure-temperatures-and-humidities-high-previously-thought"
+                    target="_blank"
+                    rel="noopener"
+                    >Penn State Study (2022)</a
+                  >
+                  |
+                  <a
+                    href="https://www.youtube.com/watch?v=7hBMbQ9de1g"
+                    target="_blank"
+                    rel="noopener"
+                    >PBS Terra Episode on Wet Bulb Events</a
+                  >
+                </p>
+              </div>
+            </div>
+            <div class="additional-info">
+              <h3>It's important to note…</h3>
+              <ul>
+                <li>
+                  <strong
+                    >The 31°C limit applies to young, healthy adults.</strong
+                  >
+                  Older adults and vulnerable populations have even lower
+                  thresholds.
+                </li>
+                <li>
+                  <strong>Activity level matters.</strong> These limits assume
+                  light activity; strenuous work lowers the threshold
+                  significantly.
+                </li>
+                <li>
+                  <strong>Duration is a key factor.</strong> Prolonged exposure
+                  is more dangerous than brief encounters.
+                </li>
+                <li>
+                  <strong>Air conditioning is the only solution.</strong> Once
+                  past the limit, shade, water, and wind cannot help.
+                </li>
+              </ul>
+              <div class="climate-projections">
+                <h4>Climate projections</h4>
+                <p>
+                  At <strong>2°C warming</strong>, likely by the 2040s, major
+                  population centers - including most of India, China, and the
+                  eastern U.S. - will regularly experience dangerous wet bulb
+                  events.
+                </p>
+                <p>
+                  At <strong>4°C warming</strong>, over 60% of Earth's land area
+                  could see uncompensable wet bulb temperatures. At this level,
+                  the <em>vast majority of the world's population</em> will be
+                  exposed to conditions that are beyond the human body's
+                  survival limits.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer class="app-footer" role="contentinfo">
+        <div class="container">
+          <p>
+            Created by Adaline Simonian |
+            <a href="https://github.com/adalinesimonian/wet-bulb-vis">
+              View on GitHub</a
+            >
+          </p>
+          <p>Copyright © 2025 Adaline Simonian. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
