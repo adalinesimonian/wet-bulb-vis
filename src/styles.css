@@ -601,7 +601,8 @@ input[type="range"]:focus-visible {
   color: var(--color-text);
 }
 
-.risk-card.danger {
+.risk-card.danger,
+.risk-card.unsurvivable {
   background: linear-gradient(
     135deg,
     rgba(239, 68, 68, 0.1),
@@ -758,7 +759,8 @@ input[type="range"]:focus-visible {
   color: var(--color-text);
 }
 
-.warning-message.danger {
+.warning-message.danger,
+.warning-message.unsurvivable {
   background: linear-gradient(
     135deg,
     rgba(239, 68, 68, 0.2),

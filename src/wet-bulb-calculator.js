@@ -167,10 +167,19 @@ export const wetBulbCalculator = {
   },
 
   /**
+   * @typedef {{
+   *   level: string,
+   *   description: string,
+   *   color: string,
+   *   warning?: { title: string, text: string },
+   * }} DangerLevel
+   */
+
+  /**
    * Get danger level classification for wet bulb temperature, based on Penn
    * State 2022 research findings.
    * @param {number} wetBulbTemp Wet bulb temperature in Celsius.
-   * @returns {{ level: string, description: string, color: string }} Object
+   * @returns {DangerLevel}
    * containing level and description.
    */
   getDangerLevel(wetBulbTemp) {
@@ -186,24 +195,40 @@ export const wetBulbCalculator = {
         description:
           "Increased caution - approaching limits for vulnerable populations",
         color: "#f59e0b",
+        warning: {
+          title: "Caution: Approaching Heat Stress Limits",
+          text: "Vulnerable populations (elderly, children, those with health conditions) may experience heat stress. Limit outdoor activities and ensure access to cooling.",
+        },
       };
     } else if (wetBulbTemp < 28) {
       return {
         level: "extreme",
         description: "Dangerous - many people cannot compensate, AC essential",
         color: "#f97316",
+        warning: {
+          title: "Extreme Heat Warning",
+          text: "Dangerous conditions. Air conditioning is essential. Even healthy individuals will struggle with temperature regulation. Avoid all unnecessary outdoor exposure.",
+        },
       };
     } else if (wetBulbTemp < 31) {
       return {
         level: "danger",
         description: "Life-threatening - approaching human survivability limit",
         color: "#ef4444",
+        warning: {
+          title: "Life-Threatening Conditions",
+          text: "Approaching human survivability limits. Prolonged exposure can be fatal even for young, healthy individuals. Immediate access to air conditioning is critical.",
+        },
       };
     } else {
       return {
         level: "unsurvivable",
         description: "Beyond human adaptability - fatal without cooling",
         color: "#991b1b",
+        warning: {
+          title: "UNSURVIVABLE CONDITIONS",
+          text: "Beyond human physiological limits. The body cannot cool itself regardless of shade, water, or wind. Fatal within hours without air conditioning. This represents the absolute limit of human adaptability.",
+        },
       };
     }
   },

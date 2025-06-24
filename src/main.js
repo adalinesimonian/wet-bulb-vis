@@ -182,20 +182,30 @@ function setupEventListeners() {
   });
 
   // Wet bulb inputs.
-  elements.wetbulbSlider.addEventListener("input", handleWetbulbSliderChange);
-  elements.wetbulbSlider.addEventListener("change", updateURL);
-  elements.wetbulbInput.addEventListener("input", handleWetbulbInputChange);
-  elements.wetbulbInput.addEventListener("change", updateURL);
+  setSliderInputEventHandlers({
+    slider: elements.wetbulbSlider,
+    input: elements.wetbulbInput,
+    min: 0,
+    max: 40,
+    stateKey: "wetBulbTemp",
+  });
 
   // Temperature & humidity inputs.
-  elements.tempSlider.addEventListener("input", handleTempSliderChange);
-  elements.tempSlider.addEventListener("change", updateURL);
-  elements.tempInput.addEventListener("input", handleTempInputChange);
-  elements.tempInput.addEventListener("change", updateURL);
-  elements.humiditySlider.addEventListener("input", handleHumiditySliderChange);
-  elements.humiditySlider.addEventListener("change", updateURL);
-  elements.humidityInput.addEventListener("input", handleHumidityInputChange);
-  elements.humidityInput.addEventListener("change", updateURL);
+  setSliderInputEventHandlers({
+    slider: elements.tempSlider,
+    input: elements.tempInput,
+    min: 0,
+    max: 50,
+    stateKey: "airTemp",
+  });
+
+  setSliderInputEventHandlers({
+    slider: elements.humiditySlider,
+    input: elements.humidityInput,
+    min: 5,
+    max: 100,
+    stateKey: "humidity",
+  });
 
   // Chart controls.
   elements.resetZoomBtn.addEventListener("click", resetChartZoom);
@@ -247,90 +257,52 @@ function handleModeSwitch(event) {
   updateURL();
 }
 
-// Wet bulb input handlers.
-/** @param {InputEvent} event */
-function handleWetbulbSliderChange(event) {
-  if (!(event.target instanceof HTMLInputElement)) {
-    return;
-  }
+/**
+ * @typedef {{
+ *   slider: HTMLInputElement,
+ *   input: HTMLInputElement,
+ *   min: number,
+ *   max: number,
+ *   stateKey: {
+ *     [K in keyof typeof state]-?: typeof state[K] extends number ? K : never
+ *   }[keyof typeof state],
+ * }} SliderEventConfig
+ */
 
-  const value = parseFloat(event.target.value);
-  state.wetBulbTemp = value;
-  elements.wetbulbInput.value = String(value);
-  elements.wetbulbSlider.setAttribute("aria-valuenow", String(value));
-  updateCalculations();
-  updateChart();
-}
+/**
+ * Sets an event handler for slider/input pairs.
+ * @param {SliderEventConfig} config
+ */
+function setSliderInputEventHandlers({ slider, input, min, max, stateKey }) {
+  /** @type {(event: Event) => void} */
+  const handler = ({ target }) => {
+    if (!(target instanceof HTMLInputElement)) {
+      return;
+    }
 
-/** @param {InputEvent} event */
-function handleWetbulbInputChange(event) {
-  if (!(event.target instanceof HTMLInputElement)) {
-    return;
-  }
+    const value = parseFloat(target.value);
+    const clamped = Math.max(min, Math.min(max, value));
 
-  const value = parseFloat(event.target.value) || 0;
-  const clamped = Math.max(0, Math.min(40, value));
-  state.wetBulbTemp = clamped;
-  elements.wetbulbSlider.value = String(clamped);
-  elements.wetbulbSlider.setAttribute("aria-valuenow", String(clamped));
-  updateCalculations();
-  updateChart();
-}
+    state[stateKey] = clamped;
 
-// Temperature input handlers.
-/** @param {InputEvent} event */
-function handleTempSliderChange(event) {
-  if (!(event.target instanceof HTMLInputElement)) {
-    return;
-  }
+    if (target === slider) {
+      input.value = String(clamped);
+    } else {
+      slider.value = String(clamped);
+    }
 
-  const value = parseFloat(event.target.value);
-  state.airTemp = value;
-  elements.tempInput.value = String(value);
-  updateCalculations();
-  updateChart();
-}
+    slider.setAttribute("aria-valuenow", String(clamped));
+    updateCalculations();
+    updateChart();
+  };
 
-/** @param {InputEvent} event */
-function handleTempInputChange(event) {
-  if (!(event.target instanceof HTMLInputElement)) {
-    return;
-  }
-
-  const value = parseFloat(event.target.value) || 0;
-  const clamped = Math.max(0, Math.min(50, value));
-  state.airTemp = clamped;
-  elements.tempSlider.value = String(clamped);
-  updateCalculations();
-  updateChart();
-}
-
-// Humidity input handlers.
-/** @param {InputEvent} event */
-function handleHumiditySliderChange(event) {
-  if (!(event.target instanceof HTMLInputElement)) {
-    return;
-  }
-
-  const value = parseFloat(event.target.value);
-  state.humidity = value;
-  elements.humidityInput.value = String(value);
-  updateCalculations();
-  updateChart();
-}
-
-/** @param {InputEvent} event */
-function handleHumidityInputChange(event) {
-  if (!(event.target instanceof HTMLInputElement)) {
-    return;
-  }
-
-  const value = parseFloat(event.target.value) || 0;
-  const clamped = Math.max(0, Math.min(100, value));
-  state.humidity = clamped;
-  elements.humiditySlider.value = String(clamped);
-  updateCalculations();
-  updateChart();
+  slider.addEventListener("input", handler);
+  input.addEventListener("input", handler);
+  slider.addEventListener("change", updateURL);
+  input.addEventListener("change", () => {
+    input.value = String(state[stateKey]);
+    updateURL();
+  });
 }
 
 // Update calculations based on current mode.
@@ -389,27 +361,7 @@ function updateDangerIndicator(wetBulbTemp, dangerElement) {
   dangerElement.style.background = gradient;
 
   // Update warning message visibility.
-  updateWarningMessage(wetBulbTemp);
-}
-
-/** Update warning message based on wet bulb temperature */
-function updateWarningMessage(wetBulbTemp) {
-  if (wetBulbTemp >= 31) {
-    // Critical threshold reached
-    elements.warningMessage.style.display = "block";
-    elements.warningTitle.textContent = "Extreme Danger!";
-    elements.warningText.textContent =
-      "Wet bulb temperature is at a life-threatening level. Take immediate action to cool down and hydrate.";
-  } else if (wetBulbTemp >= 28) {
-    // High caution threshold
-    elements.warningMessage.style.display = "block";
-    elements.warningTitle.textContent = "High Caution!";
-    elements.warningText.textContent =
-      "Wet bulb temperature is approaching dangerous levels. Limit outdoor activities and stay hydrated.";
-  } else {
-    // Hide warning message
-    elements.warningMessage.style.display = "none";
-  }
+  displayWarning(wetBulbTemp);
 }
 
 /**
@@ -422,35 +374,20 @@ function displayWarning(wetBulbTemp) {
   const textEl = elements.warningText;
 
   // Remove all warning classes.
-  warningEl.classList.remove("caution", "extreme", "danger");
+  warningEl.classList.remove("caution", "extreme", "danger", "unsurvivable");
 
-  if (wetBulbTemp < 19) {
+  const { level, warning } = wetBulbCalculator.getDangerLevel(wetBulbTemp);
+
+  if (!warning) {
     warningEl.style.display = "none";
-  } else if (wetBulbTemp < 25) {
-    warningEl.style.display = "flex";
-    warningEl.classList.add("caution");
-    titleEl.textContent = "Caution: Approaching Heat Stress Limits";
-    textEl.textContent =
-      "Vulnerable populations (elderly, children, those with health conditions) may experience heat stress. Limit outdoor activities and ensure access to cooling.";
-  } else if (wetBulbTemp < 28) {
-    warningEl.style.display = "flex";
-    warningEl.classList.add("extreme");
-    titleEl.textContent = "Extreme Heat Warning";
-    textEl.textContent =
-      "Dangerous conditions. Air conditioning is essential. Even healthy individuals will struggle with temperature regulation. Avoid all unnecessary outdoor exposure.";
-  } else if (wetBulbTemp < 31) {
-    warningEl.style.display = "flex";
-    warningEl.classList.add("danger");
-    titleEl.textContent = "Life-Threatening Conditions";
-    textEl.textContent =
-      "Approaching human survivability limits. Prolonged exposure can be fatal even for young, healthy individuals. Immediate access to air conditioning is critical.";
-  } else {
-    warningEl.style.display = "flex";
-    warningEl.classList.add("danger");
-    titleEl.textContent = "UNSURVIVABLE CONDITIONS";
-    textEl.textContent =
-      "Beyond human physiological limits. The body cannot cool itself regardless of shade, water, or wind. Fatal within hours without air conditioning. This represents the absolute limit of human adaptability.";
+    return;
   }
+
+  // Set warning message based on wet bulb temperature.
+  warningEl.style.display = "flex";
+  titleEl.textContent = warning.title;
+  textEl.textContent = warning.text;
+  warningEl.classList.add(level);
 }
 
 /** Calculate optimal label positions to avoid overlap */
