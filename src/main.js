@@ -183,13 +183,19 @@ function setupEventListeners() {
 
   // Wet bulb inputs.
   elements.wetbulbSlider.addEventListener("input", handleWetbulbSliderChange);
+  elements.wetbulbSlider.addEventListener("change", updateURL);
   elements.wetbulbInput.addEventListener("input", handleWetbulbInputChange);
+  elements.wetbulbInput.addEventListener("change", updateURL);
 
   // Temperature & humidity inputs.
   elements.tempSlider.addEventListener("input", handleTempSliderChange);
+  elements.tempSlider.addEventListener("change", updateURL);
   elements.tempInput.addEventListener("input", handleTempInputChange);
+  elements.tempInput.addEventListener("change", updateURL);
   elements.humiditySlider.addEventListener("input", handleHumiditySliderChange);
+  elements.humiditySlider.addEventListener("change", updateURL);
   elements.humidityInput.addEventListener("input", handleHumidityInputChange);
+  elements.humidityInput.addEventListener("change", updateURL);
 
   // Chart controls.
   elements.resetZoomBtn.addEventListener("click", resetChartZoom);
@@ -254,7 +260,6 @@ function handleWetbulbSliderChange(event) {
   elements.wetbulbSlider.setAttribute("aria-valuenow", String(value));
   updateCalculations();
   updateChart();
-  updateURL();
 }
 
 /** @param {InputEvent} event */
@@ -270,7 +275,6 @@ function handleWetbulbInputChange(event) {
   elements.wetbulbSlider.setAttribute("aria-valuenow", String(clamped));
   updateCalculations();
   updateChart();
-  updateURL();
 }
 
 // Temperature input handlers.
@@ -285,7 +289,6 @@ function handleTempSliderChange(event) {
   elements.tempInput.value = String(value);
   updateCalculations();
   updateChart();
-  updateURL();
 }
 
 /** @param {InputEvent} event */
@@ -300,7 +303,6 @@ function handleTempInputChange(event) {
   elements.tempSlider.value = String(clamped);
   updateCalculations();
   updateChart();
-  updateURL();
 }
 
 // Humidity input handlers.
@@ -315,7 +317,6 @@ function handleHumiditySliderChange(event) {
   elements.humidityInput.value = String(value);
   updateCalculations();
   updateChart();
-  updateURL();
 }
 
 /** @param {InputEvent} event */
@@ -330,7 +331,6 @@ function handleHumidityInputChange(event) {
   elements.humiditySlider.value = String(clamped);
   updateCalculations();
   updateChart();
-  updateURL();
 }
 
 // Update calculations based on current mode.
